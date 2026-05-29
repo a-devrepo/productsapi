@@ -1,0 +1,40 @@
+services:
+
+  db_productsapi:
+    image: postgres:16
+    container_name: postgres-productsapi
+    restart: always
+    environment:
+      POSTGRES_DB: bd_productsapi
+      POSTGRES_USER: user_productsapi
+      POSTGRES_PASSWORD: pass_productsapi
+    ports:
+      - "5435:5432"
+    networks:
+      - rede-productsapi
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin-productsapi
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - db_productsapi
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - rede-productsapi
+
+networks:
+  rede-productsapi:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  pgadmin_data:
