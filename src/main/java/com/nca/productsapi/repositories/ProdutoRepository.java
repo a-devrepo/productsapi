@@ -1,6 +1,7 @@
 package com.nca.productsapi.repositories;
 
 import com.nca.productsapi.entities.Produto;
+import com.nca.productsapi.exceptions.RepositoryException;
 import com.nca.productsapi.factories.ConnectionFactory;
 
 import java.sql.SQLException;
@@ -25,7 +26,7 @@ public class ProdutoRepository {
             statement.execute();
 
         } catch (SQLException e) {
-            throw new Exception("ERRO AO INSERIR DADOS: " + e.getMessage());
+            throw new RepositoryException("ERRO AO INSERIR DADOS: " + e.getMessage());
         }
     }
 }
