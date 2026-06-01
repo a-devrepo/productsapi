@@ -3,9 +3,11 @@ package com.nca.productsapi.repositories;
 import com.nca.productsapi.entities.Produto;
 import com.nca.productsapi.exceptions.RepositoryException;
 import com.nca.productsapi.factories.ConnectionFactory;
+import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
 
+@Repository
 public class ProdutoRepository {
 
     public void inserir(Produto obj) throws Exception {
