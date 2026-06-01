@@ -1,5 +1,7 @@
 package com.nca.productsapi.factories;
 
+import com.nca.productsapi.exceptions.InfrastructureException;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -19,7 +21,7 @@ public class ConnectionFactory {
                     PASSWORD
             );
         } catch (SQLException e) {
-            throw new RuntimeException(
+            throw new InfrastructureException(
                     "ERRO AO CONECTAR COM O BANCO DE DADOS: " + e.getMessage()
             );
         }
