@@ -6,6 +6,8 @@ import com.nca.productsapi.factories.ConnectionFactory;
 import org.springframework.stereotype.Repository;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public class ProdutoRepository {
@@ -29,6 +31,42 @@ public class ProdutoRepository {
 
         } catch (SQLException e) {
             throw new RepositoryException("ERRO AO INSERIR DADOS: " + e.getMessage());
+        }
+    }
+
+    public List<Produto> obterPorNome(String nome) throws Exception {
+
+        try (var connection = ConnectionFactory.getConnection()) {
+
+            var statement = connection.prepareStatement(
+                    """
+                            SELECT id, nome, descricao, preco, quantidade
+                            from produtos
+                                        WHERE nome ilike ?
+                                        ORDER BY nome
+                            """);
+
+            statement.setString(1, "%" + nome + "%");
+
+            var result = statement.executeQuery();
+
+            var lista = new ArrayList<Produto>();
+
+            while (result.next()) {
+
+                var produto = new Produto();
+
+                produto.setId(result.getInt("id"));
+                produto.setNome(result.getString("nome"));
+                produto.setDescricao(result.getString("descricao"));
+                produto.setPreco(result.getDouble("preco"));
+                produto.setQuantidade(result.getInt("quantidade"));
+
+                lista.add(produto);
+            }
+            return lista;
+        } catch (SQLException e) {
+            throw new RepositoryException("ERRO AO OBTER DADOS: " + e.getMessage());
         }
     }
 }
