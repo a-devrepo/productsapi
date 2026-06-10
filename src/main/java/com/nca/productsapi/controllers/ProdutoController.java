@@ -35,14 +35,43 @@ public class ProdutoController {
         }
     }
 
-    @PutMapping("/alterar")
-    public ResponseEntity<?> alterar() {
-        return ResponseEntity.ok("Produto alterado com sucesso");
+    @PutMapping("/alterar/{id}")
+    public ResponseEntity<?> alterar(@PathVariable Integer id, @RequestBody ProdutoRequestDTO dto) {
+
+        try {
+            var produto = toModel(dto, id);
+            repository.atualizar(produto);
+            return ResponseEntity.ok("Produto atualizado com sucesso");
+        } catch (RepositoryException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
     }
 
-    @DeleteMapping("/excluir")
-    public ResponseEntity<?> excluir() {
-        return ResponseEntity.ok("Produto excluído com sucesso");
+    @DeleteMapping("/excluir/{id}")
+    public ResponseEntity<?> excluir(@PathVariable Integer id) {
+        try {
+            repository.excluir(id);
+            return ResponseEntity.ok("Produto excluído com sucesso");
+        } catch (RepositoryException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/obter/{id}")
+    public ResponseEntity<?> obter(@PathVariable Integer id) {
+        try {
+            var produto = repository.obterPorId(id);
+            var dto = toDTO(produto);
+            return ResponseEntity.ok(dto);
+        } catch (RepositoryException ex) {
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
     }
 
     @GetMapping("/listar")
@@ -66,6 +95,12 @@ public class ProdutoController {
         produto.setDescricao(dto.descricao());
         produto.setPreco(dto.preco());
         produto.setQuantidade(dto.quantidade());
+        return produto;
+    }
+
+    private Produto toModel(ProdutoRequestDTO dto, Integer id) {
+        var produto = this.toModel(dto);
+        produto.setId(id);
         return produto;
     }
 
