@@ -42,7 +42,7 @@ public class ProdutoRepository {
                     """
                             SELECT id, nome, descricao, preco, quantidade
                             from produtos
-                                        WHERE nome ilike ?
+                                        WHERE  ativo = 1 AND nome ilike ?
                                         ORDER BY nome
                             """);
 
