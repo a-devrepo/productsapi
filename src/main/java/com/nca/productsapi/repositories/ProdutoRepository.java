@@ -69,4 +69,72 @@ public class ProdutoRepository {
             throw new RepositoryException("ERRO AO OBTER DADOS: " + e.getMessage());
         }
     }
+
+    public boolean excluir(Integer id) throws Exception {
+
+        try (var connection = ConnectionFactory.getConnection()) {
+            var statement = connection.prepareStatement("""
+                        update produtos 
+                        set ativo = 0, data_exclusao = now()
+                        where id = ?
+                    """);
+
+            statement.setInt(1, id);
+            var result = statement.executeUpdate();
+            return result > 0;
+        } catch (SQLException e) {
+            throw new RepositoryException("ERRO AO EXCLUIR DADOS: " + e.getMessage());
+        }
+    }
+
+    public Produto obterPorId(Integer id) throws Exception {
+
+        try (var connection = ConnectionFactory.getConnection()) {
+            var statement = connection.prepareStatement("""
+                        select id, nome, descricao, preco, quantidade
+                        from produtos
+                        where ativo = 1 and id = ?
+                    """);
+
+            statement.setInt(1, id);
+            var result = statement.executeQuery();
+
+            Produto produto = null;
+
+            if (result.next()) {
+                produto = new Produto();
+
+                produto.setId(result.getInt("id"));
+                produto.setNome(result.getString("nome"));
+                produto.setDescricao(result.getString("descricao"));
+                produto.setPreco(result.getDouble("preco"));
+                produto.setQuantidade(result.getInt("quantidade"));
+            }
+            return produto;
+        } catch (SQLException e) {
+            throw new RepositoryException("ERRO AO OBTER POR ID: " + e.getMessage());
+        }
+    }
+
+    public boolean atualizar(Produto obj) throws Exception {
+
+        try (var connection = ConnectionFactory.getConnection()) {
+            var statement = connection.prepareStatement("""
+                        update produtos 
+                        set nome = ?, descricao = ?, preco = ?, quantidade = ?, data_atualizacao = now()
+                        where ativo = 1 and id = ?
+                    """);
+
+            statement.setString(1, obj.getNome());
+            statement.setString(2, obj.getDescricao());
+            statement.setDouble(3, obj.getPreco());
+            statement.setInt(4, obj.getQuantidade());
+            statement.setInt(5, obj.getId());
+            var result = statement.executeUpdate();
+
+            return result > 0;
+        } catch (SQLException e) {
+            throw new RepositoryException("ERRO AO ATUALIZAR DADOS: " + e.getMessage());
+        }
+    }
 }
