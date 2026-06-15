@@ -5,6 +5,7 @@ import com.nca.productsapi.exceptions.RepositoryException;
 import com.nca.productsapi.factories.ConnectionFactory;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,7 +19,7 @@ public class ProdutoRepository {
         var sql =
                 """
                         INSERT INTO produtos(nome, descricao, preco, quantidade)
-                          values(?,?,?,?)
+                          VALUES (?,?,?,?)
                         """;
 
         try (var connection = ConnectionFactory.getConnection();
@@ -28,7 +29,7 @@ public class ProdutoRepository {
             preparedStatement.setString(1, obj.getNome());
             preparedStatement.setString(2, obj.getDescricao());
             preparedStatement.setDouble(3, obj.getPreco());
-            preparedStatement.setDouble(4, obj.getQuantidade());
+            preparedStatement.setInt(4, obj.getQuantidade());
 
             preparedStatement.execute();
 
@@ -44,12 +45,12 @@ public class ProdutoRepository {
         }
 
         nome = nome.trim();
-        
+
         var sql =
                 """
                         SELECT id, nome, descricao, preco, quantidade
-                        from produtos
-                                    WHERE  ativo = 1 AND nome ilike ?
+                        FROM produtos
+                                    WHERE  ativo = 1 AND nome ILIKE ?
                                     ORDER BY nome
                         """;
 
@@ -60,19 +61,12 @@ public class ProdutoRepository {
             preparedStatement.setString(1, "%" + nome + "%");
 
             try (var result = preparedStatement.executeQuery();) {
+
                 var lista = new ArrayList<Produto>();
 
                 while (result.next()) {
 
-                    var produto = new Produto();
-
-                    produto.setId(result.getInt("id"));
-                    produto.setNome(result.getString("nome"));
-                    produto.setDescricao(result.getString("descricao"));
-                    produto.setPreco(result.getDouble("preco"));
-                    produto.setQuantidade(result.getInt("quantidade"));
-
-                    lista.add(produto);
+                    lista.add(mapearProduto(result));
                 }
                 return lista;
             }
@@ -81,19 +75,25 @@ public class ProdutoRepository {
         }
     }
 
-    public boolean excluir(Integer id) throws Exception {
+    public void excluir(Integer id) throws Exception {
 
         var sql = """
-                    update produtos
-                    set ativo = 0, data_exclusao = now()
-                    where id = ?
+                    UPDATE produtos
+                    SET ativo = 0, data_exclusao = NOW()
+                    WHERE id = ?
                 """;
 
         try (var connection = ConnectionFactory.getConnection();
              var preparedStatement = connection.prepareStatement(sql);) {
+
             preparedStatement.setInt(1, id);
+
             var result = preparedStatement.executeUpdate();
-            return result > 0;
+
+            if (result == 0) {
+                throw new RepositoryException("PRODUTO NÃO ENCONTRADO.");
+            }
+
         } catch (SQLException e) {
             throw new RepositoryException("ERRO AO EXCLUIR DADOS: " + e.getMessage());
         }
@@ -102,9 +102,9 @@ public class ProdutoRepository {
     public Produto obterPorId(Integer id) throws Exception {
 
         var sql = """
-                    select id, nome, descricao, preco, quantidade
-                    from produtos
-                    where ativo = 1 and id = ?
+                    SELECT id, nome, descricao, preco, quantidade
+                    FROM produtos
+                    WHERE ativo = 1 AND id = ?
                 """;
 
         try (var connection = ConnectionFactory.getConnection();
@@ -113,31 +113,26 @@ public class ProdutoRepository {
             preparedStatement.setInt(1, id);
 
             try (var result = preparedStatement.executeQuery();) {
-                Produto produto = null;
 
                 if (result.next()) {
-                    produto = new Produto();
 
-                    produto.setId(result.getInt("id"));
-                    produto.setNome(result.getString("nome"));
-                    produto.setDescricao(result.getString("descricao"));
-                    produto.setPreco(result.getDouble("preco"));
-                    produto.setQuantidade(result.getInt("quantidade"));
+                    return mapearProduto(result);
+
+                } else {
+                    throw new RepositoryException("PRODUTO NÃO ENCONTRADO.");
                 }
-                return produto;
-
             }
         } catch (SQLException e) {
             throw new RepositoryException("ERRO AO OBTER POR ID: " + e.getMessage());
         }
     }
 
-    public boolean atualizar(Produto obj) throws Exception {
+    public void atualizar(Produto obj) throws Exception {
 
         var sql = """
-                    update produtos 
-                    set nome = ?, descricao = ?, preco = ?, quantidade = ?, data_atualizacao = now()
-                    where ativo = 1 and id = ?
+                    UPDATE produtos
+                    SET nome = ?, descricao = ?, preco = ?, quantidade = ?, data_atualizacao = NOW()
+                    WHERE ativo = 1 AND id = ?
                 """;
 
         try (var connection = ConnectionFactory.getConnection();
@@ -150,9 +145,26 @@ public class ProdutoRepository {
             preparedStatement.setInt(5, obj.getId());
             var result = preparedStatement.executeUpdate();
 
-            return result > 0;
+            if (result == 0) {
+                throw new RepositoryException("PRODUTO NÃO ENCONTRADO.");
+            }
+
         } catch (SQLException e) {
             throw new RepositoryException("ERRO AO ATUALIZAR DADOS: " + e.getMessage());
         }
+    }
+
+    private Produto mapearProduto(ResultSet result)
+            throws SQLException {
+
+        var produto = new Produto();
+
+        produto.setId(result.getInt("id"));
+        produto.setNome(result.getString("nome"));
+        produto.setDescricao(result.getString("descricao"));
+        produto.setPreco(result.getDouble("preco"));
+        produto.setQuantidade(result.getInt("quantidade"));
+
+        return produto;
     }
 }
