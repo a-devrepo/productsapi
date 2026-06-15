@@ -1,19 +1,26 @@
 package com.nca.productsapi.factories;
 
 import com.nca.productsapi.exceptions.InfrastructureException;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+@Component
 public class ConnectionFactory {
-    private static final String URL =
-            "jdbc:postgresql://localhost:5435/bd_productsapi";
 
-    private static final String USER = "user_productsapi";
-    private static final String PASSWORD = "pass_productsapi";
+    @Value("${spring.datasource.url}")
+    private String URL;
 
-    public static Connection getConnection() {
+    @Value("${spring.datasource.username}")
+    private String USER = "user_productsapi";
+
+    @Value("${spring.datasource.password}")
+    private String PASSWORD = "pass_productsapi";
+
+    public Connection getConnection() {
         try {
             return DriverManager.getConnection(
                     URL,

@@ -1,5 +1,12 @@
+server:
+  port: 8081
+
 spring:
   application:
     name: productsapi
-server:
-  port: 8081
+
+  datasource:
+    url: jdbc:postgresql://localhost:5435/bd_productsapi
+    username: user_productsapi
+    password: pass_productsapi
+    driver-class-name: org.postgresql.Driver

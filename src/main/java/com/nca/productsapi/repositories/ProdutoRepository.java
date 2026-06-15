@@ -14,6 +14,12 @@ import java.util.List;
 @Repository
 public class ProdutoRepository {
 
+    private ConnectionFactory connectionFactory;
+
+    public ProdutoRepository(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
+    }
+
     public void inserir(Produto obj) throws Exception {
 
         var sql =
@@ -22,7 +28,7 @@ public class ProdutoRepository {
                           VALUES (?,?,?,?)
                         """;
 
-        try (var connection = ConnectionFactory.getConnection();
+        try (var connection = connectionFactory.getConnection();
              var preparedStatement = connection.prepareStatement(sql);
         ) {
 
@@ -54,7 +60,7 @@ public class ProdutoRepository {
                                     ORDER BY nome
                         """;
 
-        try (var connection = ConnectionFactory.getConnection();
+        try (var connection = connectionFactory.getConnection();
              var preparedStatement = connection.prepareStatement(sql);
         ) {
 
@@ -83,7 +89,7 @@ public class ProdutoRepository {
                     WHERE id = ?
                 """;
 
-        try (var connection = ConnectionFactory.getConnection();
+        try (var connection = connectionFactory.getConnection();
              var preparedStatement = connection.prepareStatement(sql);) {
 
             preparedStatement.setInt(1, id);
@@ -107,7 +113,7 @@ public class ProdutoRepository {
                     WHERE ativo = 1 AND id = ?
                 """;
 
-        try (var connection = ConnectionFactory.getConnection();
+        try (var connection = connectionFactory.getConnection();
              var preparedStatement = connection.prepareStatement(sql);) {
 
             preparedStatement.setInt(1, id);
@@ -135,7 +141,7 @@ public class ProdutoRepository {
                     WHERE ativo = 1 AND id = ?
                 """;
 
-        try (var connection = ConnectionFactory.getConnection();
+        try (var connection = connectionFactory.getConnection();
              var preparedStatement = connection.prepareStatement(sql);) {
 
             preparedStatement.setString(1, obj.getNome());
