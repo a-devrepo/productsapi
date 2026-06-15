@@ -15,10 +15,10 @@ public class ConnectionFactory {
     private String URL;
 
     @Value("${spring.datasource.username}")
-    private String USER = "user_productsapi";
+    private String USER;
 
     @Value("${spring.datasource.password}")
-    private String PASSWORD = "pass_productsapi";
+    private String PASSWORD;
 
     public Connection getConnection() {
         try {
